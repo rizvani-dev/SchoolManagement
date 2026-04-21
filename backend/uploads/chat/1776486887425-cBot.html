@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rizvani Chatbot!</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        #chatButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        #chatButton:hover {
+            transform: scale(1.1);
+        }
+
+        #chatContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        #minimizeBtn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        #chatMessages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .user-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background: #e9ecef;
+            color: black;
+            align-self: flex-start;
+        }
+
+        #inputGroup {
+            padding: 10px;
+            background: white;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        #sendBtn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #sendBtn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="chatButton" onclick="toggleChat()">💬 Chat</button>
+
+    <div id="chatContainer">
+        <div class="chat-header">
+            <span>Chat Assistant</span>
+            <button id="minimizeBtn" onclick="toggleChat()">&times;</button>
+        </div>
+        <div id="chatMessages"></div>
+        <div id="inputGroup">
+            <input type="text" id="userInput" placeholder="Type your message...">
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const chatContainer = document.getElementById("chatContainer");
+            chatContainer.style.display = (chatContainer.style.display === "none" || chatContainer.style.display === "") ? "flex" : "none";
+        }
+
+        function appendMessage(sender, text) {
+            const chatMessages = document.getElementById("chatMessages");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", sender === "user" ? "user-message" : "bot-message");
+            messageDiv.innerHTML = `<span>${text}</span>`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function appendTypingIndicator() {
+            const chatMessages = document.getElementById("chatMessages");
+            const typingDiv = document.createElement("div");
+            typingDiv.id = "typing-indicator";
+            typingDiv.classList.add("message", "bot-message");
+            typingDiv.innerHTML = `<span>Typing...</span>`;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingDiv = document.getElementById("typing-indicator");
+            if (typingDiv) typingDiv.remove();
+        }
+
+        function getPredefinedResponse(message) {
+            const responses = {
+                "hello": "Hi there! How can I assist you today?",
+                "how are you": "I'm just a chatbot, but I'm here to help! 😊",
+                "what is your name": "I'm your AI chatbot assistant! created by Rizwan",
+                "who created you": "I was created by a Rizwan to assist with your questions!",
+                "what can you do": "I can chat with you, answer your questions, and provide helpful information!",
+                "tell me a joke": "Why don’t programmers like nature? Because it has too many bugs! 😆",
+                "what is AI": "AI, or Artificial Intelligence, is the simulation of human intelligence in machines!",
+                "what is machine learning": "Machine learning is a branch of AI that enables computers to learn from data!",
+                "what is deep learning": "Deep learning is a subset of machine learning using neural networks!",
+                "what is cryptocurrency mining": "Cryptocurrency mining is the process of validating transactions on a blockchain network!",
+                "how to start investing in stocks": "Research companies, open a brokerage account, and start investing wisely!",
+                "how to create a mobile app": "You can use React Native, Flutter, or Swift to build a mobile app!",
+                "what is an API": "An API (Application Programming Interface) allows different software to communicate with each other!",
+                "what is cloud computing": "Cloud computing delivers computing services over the internet!",
+                "how to make passive income": "You can try affiliate marketing, blogging, YouTube, or selling digital products!",
+                "how to become a web developer": "Learn HTML, CSS, JavaScript, and frameworks like React.js or Node.js!",
+                "how to start a YouTube channel": "Choose a niche, create content, and stay consistent with uploads!",
+                "how to get monetized on YouTube": "You need 1,000 subscribers and 4,000 watch hours to apply for monetization!",
+                "what is the best way to learn coding": "Practice daily, work on projects, and explore online tutorials!",
+                "how to market a product online": "Use social media, SEO, email marketing, and paid ads!",
+                "what is PPC advertising": "PPC (Pay-Per-Click) advertising is a model where advertisers pay per ad click!",
+                "how to rank a website on Google": "Optimize for SEO, create high-quality content, and build backlinks!",
+                "what is an SSL certificate": "An SSL certificate secures websites by encrypting data between the user and the server!",
+                "what is UI/UX design": "UI (User Interface) focuses on visuals, while UX (User Experience) focuses on usability!",
+                "what is freelancing": "Freelancing is working independently on projects for clients!",
+                "what are the best freelancing platforms": "Upwork, Fiverr, Freelancer, and Toptal are great options!",
+                "how to write SEO-friendly content": "Use keywords naturally, write valuable content, and structure articles well!",
+                "what is copywriting": "Copywriting is writing persuasive content for marketing and sales!",
+                "what is a chatbot": "A chatbot is an AI program that can simulate human conversation!",
+                "how to automate social media": "You can use tools like Buffer, Hootsuite, or Later!",
+                "how to create a successful blog": "Choose a niche, write quality content, and use SEO strategies!",
+                "how to become a graphic designer": "Learn design tools like Photoshop, Illustrator, or Canva!",
+                "what is dropshipping": "Dropshipping is an e-commerce model where sellers don’t store inventory!",
+                "how to increase online sales": "Use SEO, social media ads, and influencer marketing!",
+                "what is affiliate marketing": "Affiliate marketing is earning commissions by promoting products!",
+                "how to secure a WordPress website": "Use strong passwords, enable SSL, and install security plugins!",
+                "what is Google AdSense": "Google AdSense allows website owners to earn money by displaying ads!",
+                "how to get approved for AdSense": "Ensure your site has quality content, a privacy policy, and sufficient traffic!",
+                "what is the best way to learn SEO": "Follow SEO blogs, watch tutorials, and practice on your website!",
+                "how to go viral on TikTok": "Post trending content, use hashtags, and engage with your audience!",
+                "how to get verified on Instagram": "Build a strong presence, stay active, and meet Instagram’s verification criteria!",
+                "how to become a social media influencer": "Post valuable content, stay consistent, and engage with followers!",
+                "what is blockchain": "Blockchain is a decentralized digital ledger used in cryptocurrencies and secure transactions!",
+                "how to start a podcast": "Choose a niche, record episodes, and publish on platforms like Spotify or Apple Podcasts!",
+                "how to grow an email list": "Offer free resources, use pop-ups, and create engaging newsletters!",
+                "what is Google Analytics": "Google Analytics tracks and reports website traffic!",
+                "how to remove a background from an image": "You can use tools like remove.bg, Photoshop, or AI-based background removers!",
+                "how to build a gaming PC": "Choose components like CPU, GPU, RAM, and assemble them carefully!",
+                "how to earn money with AI": "You can create AI tools, sell AI services, or build AI-powered products!",
+                "what is Web3": "Web3 is the next evolution of the internet using blockchain and decentralized applications!",
+                "what is the metaverse": "The metaverse is a virtual world where users can interact using avatars!",
+                "how to make a viral marketing campaign": "Create shareable content, use trends, and target the right audience!",
+                "how to improve video editing skills": "Practice with tools like Premiere Pro, Final Cut, or DaVinci Resolve!",
+                "how to get free traffic to my website": "Use SEO, social media, and guest blogging!",
+                "how to design an eye-catching logo": "Use tools like Adobe Illustrator, Canva, or hire a designer!",
+                "how to build a SaaS business": "Identify a problem, build a solution, and use subscription-based pricing!",
+                "how to become a digital nomad": "Work remotely, choose online jobs, and travel while working!",
+                "how to stay motivated": "Set goals, stay consistent, and surround yourself with positive influences!",
+                "how to overcome fear": "Face it step by step, stay calm, and practice mindfulness!",
+                "how to start coding": "Choose a language, follow tutorials, and practice regularly!"
+            };
+
+            return responses[message.toLowerCase()] || null;
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const message = userInput.value.trim();
+            if (message === "") return;
+
+            appendMessage("user", message);
+            userInput.value = "";
+
+            appendTypingIndicator();
+
+            // Check for predefined responses
+            const predefinedResponse = getPredefinedResponse(message);
+            if (predefinedResponse) {
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    appendMessage("bot", predefinedResponse);
+                }, 1000);
+                return;
+            }
+
+            // If no predefined response, call API
+            fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer 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"
+                },
+                body: JSON.stringify({
+                    model: "openai/gpt-3.5-turbo",
+                    messages: [{ role: "user", content: message }]
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    removeTypingIndicator();
+                    appendMessage("bot", data.choices?.[0]?.message?.content || "Sorry, I couldn't process your request.");
+                })
+                .catch(error => {
+                    removeTypingIndicator();
+                    appendMessage("bot", "Error connecting to chat service.");
+                    console.error("Error:", error);
+                });
+        }
+
+        document.getElementById("sendBtn").addEventListener("click", sendMessage);
+        document.getElementById("userInput").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") sendMessage();
+        });
+    </script>
+
+</body>
+
+</html>
